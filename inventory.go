@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"html/template"
 	"database/sql"
-	"bbi/netutil"	
+	"github.com/wheerdam/netutil"	
 	"github.com/icza/session"
 )
 
@@ -824,7 +824,7 @@ func messageMustLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func Install(prefix string, usersFile string, templateDir string, staticDir string,
-		dbConf string) (error) {
+		db *sql.DB) (error) {
 	if prefix != "" {
 		invPrefix = "/" + prefix
 	} else {
@@ -840,8 +840,7 @@ func Install(prefix string, usersFile string, templateDir string, staticDir stri
 		if _, err := os.Stat(templateDir + "/" + fileName); os.IsNotExist(err) {
 			return errors.New(templateDir + "/" + fileName + " does not exist")
 		}
-	}
-	
+	}	
 	http.HandleFunc(invPrefix+"/login", LoginPage)
 	http.HandleFunc(invPrefix+"/list", ListingPage)
 	http.HandleFunc(invPrefix+"/logout", LogoutPage)
@@ -866,11 +865,6 @@ func Install(prefix string, usersFile string, templateDir string, staticDir stri
 	if err != nil {
 		return err 
 	}
-	fmt.Println("Connecting to database defined by '" +
-				os.Args[3] + "'...")
-	invDB, err = netutil.OpenPostgresDBFromConfig(dbConf)
-	if err != nil {
-		return err
-	}
+	invDB = db
 	return nil
 }
